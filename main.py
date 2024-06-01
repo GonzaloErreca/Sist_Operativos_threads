@@ -1,6 +1,9 @@
 #Este es un ejemplo de un programa que no utiliza hilos (threads), las funciones prepareMate() y buyFacturas() se ejecutan de manera secuencial, una después de la otra.
-#Esto significa que el programa espera a que prepareMate() termine completamente antes de comenzar buyFacturas().
+# el programa espera a que prepareMate() termine completamente antes de comenzar buyFacturas().
 #Este enfoque secuencial resulta en un tiempo total de ejecución que es la suma de los tiempos de las dos funciones, ya que cada una bloquea la ejecución de la otra hasta que termina.
+# Debajo se encuentra el mismo programa pero utilizando threads, lo que significa que las dos tareas corren en paralelo y por lo tanto el programa es mas rapido y eficiente.
+
+
 print(f"\n")
 print(f"Los programas se ejecutan de forma secuencial:")
 print(f"\n")
@@ -43,42 +46,54 @@ if __name__ == "__main__":
 
 #------------------------------------------------------------------------------
 print(f"\n")
-print(f"Los programas se ejecutan de forma asíncrona:")
+print(f"Los programas se ejecutan como threads:")
 print(f"\n")
-import asyncio      # Importa el módulo asyncio, que permite la programación asíncrona
-import time     
 
-# Definimos una función asíncrona (co-rutina) llamada prepareMate()
-async def prepareMate():
-    print("Start prepareMate()") 
-    await asyncio.sleep(3)   # Usamos asyncio.sleep para simular una espera de 3 segundos de forma asíncrona
+import threading  # Importa el módulo threading para trabajar con hilos.
+#import time  # Importa el módulo time para trabajar con el tiempo.
+
+# función para preparar el mate
+def prepareMate():
+    print("Start prepareMate()")  
+    time.sleep(3)  
     print("End prepareMate()")  
     return "Mate is ready"  
 
-# lo mismo con la función asíncrona buyFacturas()
-async def buyFacturas():
+# Define una función para comprar facturas
+def buyFacturas():
     print("Start buyFacturas()")  
-    await asyncio.sleep(5)  # simulamos una espera de 5 segundos
+    time.sleep(5)  
     print("End buyFacturas()")  
-    return "Facturas are ready" 
+    return "Facturas are ready"  
 
-#Función  principal asíncrona
-async def main():
-    start_time = time.time()  # Guarda el tiempo de inicio antes de ejecutar las tareas
+# función principal
+def main():
+    start_time = time.time()  # Marca el tiempo de inicio antes de ejecutar las tareas.
 
-    # Se usa asyncio.gather para ejecutar prepareMate() y buyFacturas() concurrentemente en batch
+    # Crea dos hilos para ejecutar prepareMate y buyFacturas
+    thread1 = threading.Thread(target=prepareMate)  # Crea un hilo para la función prepareMate()
+    thread2 = threading.Thread(target=buyFacturas)  # Crea un hilo para la función buyFacturas()
 
-    batch = asyncio.gather(prepareMate(), buyFacturas())
-    result_mate, result_facturas = await batch           # Espera a que ambas tareas se completen y obtiene sus resultados.
+    # Inicio ambos hilos
+    thread1.start()
+    thread2.start()
 
-    end_time = time.time()  # Marca el tiempo de fin después de que ambas tareas hayan terminado.
-    tiempoTranscurrido = end_time - start_time  # Calcula el tiempo total transcurrido restando el tiempo de inicio al tiempo de fin.
+    # Espera a que ambos hilos terminen
+    thread1.join()
+    thread2.join()
+
+    end_time = time.time()  # tiempo después de que ambas tareas terminaron.
+    elapsed_time = end_time - start_time  # guarda el tiempo total transcurrido.
 
     # Imprime los resultados de las tareas y el tiempo total transcurrido.
-    print(f"Result for prepareMate: {result_mate}")
-    print(f"Result for buyFacturas: {result_facturas}")
-    print(f"Total elapsed time: {tiempoTranscurrido:.2f} seconds")
+    print(f"Result for prepareMate: Mate is ready")
+    print(f"Result for buyFacturas: Facturas are ready")
+    print(f"Total elapsed time: {elapsed_time:.2f} seconds")
 
-# Si el archivo se está ejecutando directamente (no importado como un módulo), ejecuta la función main() usando asyncio.run()
+# Ejecuta la función principal si este script se está ejecutando directamente
 if __name__ == "__main__":
-    asyncio.run(main())  # Ejecuta la función main de forma asíncrona.
+    main()
+    
+print(f"\n")
+print(f"se ve una diferencia de velocidad de 3 segundos entre el sistema que corrio los programas en secuencia VS el que los corrio usando threads")
+print(f"\n")
